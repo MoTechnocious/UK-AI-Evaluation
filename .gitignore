@@ -1,0 +1,39 @@
+# Secrets and local config — never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Rust
+target/
+
+# Inspect / eval run artefacts (published runs are promoted deliberately, not auto-committed)
+logs/
+*.eval
+
+# Red-team tool output
+garak_runs/
+.promptfoo/
+promptfoo-output/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp

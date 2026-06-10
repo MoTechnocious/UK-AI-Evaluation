@@ -1,0 +1,38 @@
+[project]
+name = "uk-ai-assurance"
+version = "0.0.1"
+description = "UK AI Assurance — evaluation, red-team and assurance tooling (Inspect-based)"
+requires-python = ">=3.11"
+dependencies = [
+    # Spine of the eval product (UK AISI). Exact pin lives in the lockfile —
+    # regenerate with `uv lock` (or `pip freeze > requirements-lock.txt`) on Linux.
+    "inspect-ai>=0.3,<0.4",
+    "python-dotenv>=1.0,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.8,<1",
+    "pytest>=8,<9",
+    "pre-commit>=4,<5",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# Config-and-tasks repo, not an installable package (yet). Eval tasks are run by
+# path via `inspect eval`, not imported from site-packages.
+py-modules = []
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "S"]  # S = bandit security rules
+ignore = ["S101"]  # assert is fine in tests; pytest relies on it
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
