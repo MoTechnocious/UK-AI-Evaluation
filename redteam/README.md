@@ -31,6 +31,16 @@ Every finding maps to at least one category so reports are legible to security b
 | LLM09 | Misinformation |
 | LLM10 | Unbounded Consumption |
 
+## Adversarial test battery
+
+The reusable adversarial battery (prompt injection, jailbreak, data exfiltration, tool
+abuse, bias/fairness, clinical safety) is versioned at
+[`evals/datasets/adversarial-battery-v1/`](../evals/datasets/adversarial-battery-v1/) and
+runs through the Inspect harness at
+[`evals/tasks/adversarial_battery/`](../evals/tasks/adversarial_battery/) so every run
+produces an auditable `.eval` log. It maps to the OWASP categories below. Rationale:
+[ADR-003](../docs/adr/ADR-003-adversarial-battery.md).
+
 ## Rules of the room
 
 - Red-team runs execute against **authorised targets only** — our own sandboxes, or a
