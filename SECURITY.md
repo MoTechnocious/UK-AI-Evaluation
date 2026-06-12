@@ -6,7 +6,7 @@ claim no certification.
 
 ## Reporting a vulnerability
 
-Email **inquiries@ukaiassurance.com** with subject `SECURITY`. Please include
+Email **inquiries@ukaievaluation.com** with subject `SECURITY`. Please include
 reproduction steps and impact. We will acknowledge within 5 working days. Please do not
 open a public issue for security reports.
 

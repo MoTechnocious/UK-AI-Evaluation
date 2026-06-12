@@ -64,4 +64,4 @@ Not yet licensed — all rights reserved while the licensing decision is made
 
 ## Contact
 
-UK AI Evaluation — London, UK · <https://ukaiassurance.com> · inquiries@ukaiassurance.com
+UK AI Evaluation — London, UK · <https://ukaievaluation.com> · inquiries@ukaievaluation.com

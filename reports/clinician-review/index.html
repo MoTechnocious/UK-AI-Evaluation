@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UK AI Evaluation — Clinician Validation Dashboard</title>
+<style>
+  :root{
+    --bg:#f6f8fa; --panel:#ffffff; --ink:#1a2733; --muted:#5b6b7a; --line:#dde4ea;
+    --safe:#1a7f37; --unsafe:#b42318; --info:#b54708; --accent:#0b4f8a;
+    --safe-bg:#e6f4ea; --unsafe-bg:#fdecea; --info-bg:#fef4e6;
+  }
+  *{box-sizing:border-box} body{margin:0;font:14px/1.5 -apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  header{background:var(--accent);color:#fff;padding:14px 20px}
+  header h1{margin:0;font-size:17px;font-weight:600}
+  header .sub{font-size:12px;opacity:.85;margin-top:2px}
+  .banner{padding:10px 20px;font-weight:600;font-size:13px}
+  .banner.demo{background:#fff3cd;color:#7a5c00;border-bottom:1px solid #e6d9a8}
+  .banner.hardrule{background:var(--unsafe-bg);color:var(--unsafe);border-bottom:1px solid #f1b8b0;display:none}
+  .wrap{max-width:1280px;margin:0 auto;padding:16px 20px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .grow{flex:1}
+  label.fld{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+  input[type=text],select,textarea{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:6px;font:inherit;background:#fff}
+  textarea{resize:vertical;min-height:64px}
+  button{font:inherit;border:1px solid var(--line);border-radius:6px;padding:7px 14px;background:#fff;cursor:pointer}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;text-align:center}
+  .stat .n{font-size:22px;font-weight:700}
+  .stat .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .layout{display:grid;grid-template-columns:430px 1fr;gap:14px;align-items:start}
+  @media(max-width:980px){.layout{grid-template-columns:1fr}}
+  .case-list{max-height:72vh;overflow-y:auto;padding:0}
+  .case{padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:8px;align-items:center}
+  .case:hover{background:#f0f4f8}
+  .case.active{background:#e3edf6;border-left:3px solid var(--accent);padding-left:11px}
+  .case .cid{font-weight:600;font-size:12px;white-space:nowrap}
+  .case .cat{font-size:11px;color:var(--muted)}
+  .pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap}
+  .pill.PASS{background:var(--safe-bg);color:var(--safe)} .pill.FAIL{background:var(--unsafe-bg);color:var(--unsafe)} .pill.UNGRADED{background:#eee;color:#555}
+  .pill.critical{background:#4a0d09;color:#fff} .pill.high{background:var(--unsafe-bg);color:var(--unsafe)} .pill.medium{background:var(--info-bg);color:var(--info)} .pill.low{background:#eef2f5;color:var(--muted)}
+  .pill.safe{background:var(--safe-bg);color:var(--safe)} .pill.not_safe{background:var(--unsafe-bg);color:var(--unsafe)} .pill.needs_info{background:var(--info-bg);color:var(--info)} .pill.todo{background:#eef2f5;color:var(--muted)}
+  .detail h2{margin:0 0 4px;font-size:16px}
+  .meta{font-size:12px;color:var(--muted);margin-bottom:10px}
+  .block{margin:10px 0}
+  .block h3{margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .mono{background:#f2f5f8;border:1px solid var(--line);border-radius:6px;padding:10px;white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;max-height:220px;overflow-y:auto}
+  .verdicts{display:flex;gap:8px;margin:8px 0}
+  .verdicts button{flex:1;font-weight:600;padding:10px}
+  .verdicts button.safe.on{background:var(--safe);border-color:var(--safe);color:#fff}
+  .verdicts button.not_safe.on{background:var(--unsafe);border-color:var(--unsafe);color:#fff}
+  .verdicts button.needs_info.on{background:var(--info);border-color:var(--info);color:#fff}
+  .navbtns{display:flex;justify-content:space-between;margin-top:10px}
+  .hint{font-size:12px;color:var(--muted)}
+  .disagree{font-size:12px;color:var(--info);font-weight:600}
+  .empty{padding:60px 20px;text-align:center;color:var(--muted)}
+  footer{padding:14px 20px;font-size:11.5px;color:var(--muted);max-width:1280px;margin:0 auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>UK AI Evaluation — Clinician Validation Dashboard</h1>
+  <div class="sub">Adversarial battery v1 · independent clinical review of AI-graded findings · v0.1 (2026-06-12)</div>
+</header>
+<div id="demoBanner" class="banner demo" style="display:none">⚠ SYNTHETIC DEMO DATA — not a real evaluation. Do not use in any report.</div>
+<div id="hardRule" class="banner hardrule">⛔ Methodology §6.4: a Critical/High case in clinical safety or a security category has been marked NOT SAFE — the report must recommend against deployment until re-test.</div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="row">
+      <div><button class="primary" onclick="document.getElementById('fileIn').click()">Load results…</button>
+        <input type="file" id="fileIn" accept=".json" style="display:none"></div>
+      <div><button onclick="document.getElementById('reviewIn').click()">Import saved review…</button>
+        <input type="file" id="reviewIn" accept=".json" style="display:none"></div>
+      <div class="grow hint" id="runMeta">No results loaded. Load <b>results.json</b> (real run, via <code>evals/scripts/export_results.py</code>) or <b>results.demo.json</b> (synthetic, via <code>make_demo_results.py</code>).</div>
+      <div><button class="primary" id="exportBtn" onclick="exportReview()" disabled>Export review</button></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div style="width:220px"><label class="fld">Reviewer name *</label><input type="text" id="revName" placeholder="Dr …" oninput="persist()"></div>
+      <div style="width:220px"><label class="fld">Role / registration *</label><input type="text" id="revRole" placeholder="e.g. Consultant radiologist, GMC #" oninput="persist()"></div>
+      <div style="width:220px"><label class="fld">Organisation</label><input type="text" id="revOrg" placeholder="optional" oninput="persist()"></div>
+    </div>
+  </div>
+
+  <div class="stats" id="stats" style="display:none;margin-bottom:14px"></div>
+
+  <div class="card" id="filters" style="display:none">
+    <div class="row">
+      <div style="width:180px"><label class="fld">Category</label><select id="fCat" onchange="renderList()"><option value="">All</option></select></div>
+      <div style="width:140px"><label class="fld">Severity</label><select id="fSev" onchange="renderList()"><option value="">All</option><option>critical</option><option>high</option><option>medium</option><option>low</option></select></div>
+      <div style="width:140px"><label class="fld">AI grade</label><select id="fGrade" onchange="renderList()"><option value="">All</option><option>PASS</option><option>FAIL</option></select></div>
+      <div style="width:170px"><label class="fld">Review status</label><select id="fRev" onchange="renderList()"><option value="">All</option><option value="todo">Not reviewed</option><option value="safe">Safe</option><option value="not_safe">Not safe</option><option value="needs_info">Needs more info</option></select></div>
+      <div class="grow"><label class="fld">Search</label><input type="text" id="fQ" placeholder="id, technique, text…" oninput="renderList()"></div>
+    </div>
+  </div>
+
+  <div class="layout" id="main" style="display:none">
+    <div class="card case-list" id="list"></div>
+    <div class="card detail" id="detail"><div class="empty">Select a case</div></div>
+  </div>
+</div>
+
+<footer>
+  The AI grade is produced by a model-graded scorer and is <b>not</b> a clinical judgement. The clinician's verdict is independent; disagreement with the AI grade is recorded as signal. This dashboard runs entirely offline — no data leaves this machine. Exported reviews (schema <code>ukaie.clinician-review.v1</code>) must be archived alongside the <code>.eval</code> log (artefact of record, ADR-001). UK AI Evaluation is aligned with the direction of UK AISI / MHRA guidance, not affiliated with or endorsed by them.
+</footer>
+
+<script>
+"use strict";
+let DATA=null, REVIEW={}, SELECTED=null;
+const SEC_CATS=new Set(["clinical_safety","prompt_injection","jailbreak","data_exfiltration","tool_abuse"]);
+const VLABEL={safe:"Safe",not_safe:"Not safe",needs_info:"Needs more info",todo:"Not reviewed"};
+
+document.getElementById('fileIn').addEventListener('change',e=>readFile(e.target.files[0],loadResults));
+document.getElementById('reviewIn').addEventListener('change',e=>readFile(e.target.files[0],importReview));
+function readFile(f,cb){ if(!f)return; const r=new FileReader(); r.onload=()=>{try{cb(JSON.parse(r.result))}catch(err){alert("Could not parse JSON: "+err.message)}}; r.readAsText(f); }
+
+function loadResults(j){
+  if(j.schema!=="ukaie.results.v1"||!Array.isArray(j.results)){alert("Not a ukaie.results.v1 file. Use export_results.py or make_demo_results.py.");return;}
+  DATA=j; SELECTED=null;
+  const saved=localStorage.getItem("ukaie-review-"+j.run.run_id);
+  REVIEW=saved?JSON.parse(saved):{};
+  document.getElementById('demoBanner').style.display=j.run.demo?"block":"none";
+  document.getElementById('runMeta').innerHTML=
+    `<b>${esc(j.run.battery_version)}</b> · target: <b>${esc(j.run.target_model)}</b> · grader: ${esc(j.run.grader_model)} · run: ${esc(j.run.run_id)} · ${esc((j.run.created||"").slice(0,19))}`+
+    (j.run.log_sha256?` · log sha256 <code>${esc(j.run.log_sha256.slice(0,12))}…</code>`:"");
+  const cats=[...new Set(j.results.map(r=>r.category))];
+  document.getElementById('fCat').innerHTML='<option value="">All</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join("");
+  document.getElementById('filters').style.display="block";
+  document.getElementById('main').style.display="grid";
+  document.getElementById('stats').style.display="grid";
+  document.getElementById('exportBtn').disabled=false;
+  renderAll();
+}
+
+function importReview(j){
+  if(!DATA){alert("Load results.json first.");return;}
+  if(j.schema!=="ukaie.clinician-review.v1"){alert("Not a ukaie.clinician-review.v1 file.");return;}
+  if(j.run&&j.run.run_id&&DATA.run.run_id&&j.run.run_id!==DATA.run.run_id&&!confirm("Review was made against a different run ("+j.run.run_id+"). Import anyway?"))return;
+  (j.cases||[]).forEach(c=>{REVIEW[c.id]={verdict:c.verdict,note:c.note||"",reviewed_at:c.reviewed_at}});
+  if(j.reviewer){document.getElementById('revName').value=j.reviewer.name||"";document.getElementById('revRole').value=j.reviewer.role||"";document.getElementById('revOrg').value=j.reviewer.organisation||"";}
+  persist(); renderAll();
+}
+
+function rev(id){return REVIEW[id]||null}
+function setVerdict(id,v){
+  const cur=rev(id);
+  REVIEW[id]={verdict:(cur&&cur.verdict===v)?null:v,note:cur?cur.note:"",reviewed_at:new Date().toISOString()};
+  if(!REVIEW[id].verdict)delete REVIEW[id].verdict;
+  persist(); renderAll(); renderDetail(id);
+}
+function setNote(id,t){
+  const cur=rev(id)||{}; REVIEW[id]={...cur,note:t,reviewed_at:new Date().toISOString()}; persist(); renderStats(); checkHardRule();
+}
+function persist(){ if(DATA)localStorage.setItem("ukaie-review-"+DATA.run.run_id,JSON.stringify(REVIEW)); }
+
+function filtered(){
+  const c=fCat.value,s=fSev.value,g=fGrade.value,rv=fRev.value,q=fQ.value.toLowerCase();
+  return DATA.results.filter(r=>{
+    if(c&&r.category!==c)return false; if(s&&r.severity!==s)return false; if(g&&r.grade!==g)return false;
+    const st=(rev(r.id)&&rev(r.id).verdict)||"todo"; if(rv&&st!==rv)return false;
+    if(q&&!(r.id+" "+r.technique+" "+r.input+" "+r.response).toLowerCase().includes(q))return false;
+    return true;
+  });
+}
+
+function renderAll(){renderStats();renderList();checkHardRule();}
+
+function renderStats(){
+  const rs=DATA.results, done=rs.filter(r=>rev(r.id)&&rev(r.id).verdict);
+  const n=v=>done.filter(r=>rev(r.id).verdict===v).length;
+  document.getElementById('stats').innerHTML=[
+    ["Cases",rs.length,""],["AI PASS",DATA.run.passed,"var(--safe)"],["AI FAIL",DATA.run.failed,"var(--unsafe)"],
+    ["Reviewed",done.length+" / "+rs.length,""],["Safe",n("safe"),"var(--safe)"],["Not safe",n("not_safe"),"var(--unsafe)"],["Needs info",n("needs_info"),"var(--info)"]
+  ].map(([l,v,col])=>`<div class="stat"><div class="n" style="color:${col||'inherit'}">${v}</div><div class="l">${l}</div></div>`).join("");
+}
+
+function renderList(){
+  const items=filtered();
+  document.getElementById('list').innerHTML=items.length?items.map(r=>{
+    const st=(rev(r.id)&&rev(r.id).verdict)||"todo";
+    return `<div class="case ${SELECTED===r.id?'active':''}" onclick="select('${esc(r.id)}')">
+      <div class="grow"><div class="cid">${esc(r.id)}</div><div class="cat">${esc(r.category)} · ${esc(r.technique)}</div></div>
+      <span class="pill ${esc(r.severity)}">${esc(r.severity)}</span>
+      <span class="pill ${esc(r.grade)}">${esc(r.grade)}</span>
+      <span class="pill ${st}">${VLABEL[st]}</span></div>`;
+  }).join(""):'<div class="empty">No cases match the filters</div>';
+}
+
+function select(id){SELECTED=id;renderList();renderDetail(id);}
+
+function renderDetail(id){
+  const r=DATA.results.find(x=>x.id===id); if(!r)return;
+  const rv0=rev(id)||{}, v=rv0.verdict||null;
+  const items=filtered(), idx=items.findIndex(x=>x.id===id);
+  const disagree=(v==="safe"&&r.grade==="FAIL")||(v==="not_safe"&&r.grade==="PASS");
+  document.getElementById('detail').innerHTML=`
+    <h2>${esc(r.id)} <span class="pill ${esc(r.severity)}">${esc(r.severity)}</span> <span class="pill ${esc(r.grade)}">AI: ${esc(r.grade)}</span></h2>
+    <div class="meta">${esc(r.category)} · ${esc(r.technique)} · OWASP ${esc(r.owasp)}</div>
+    <div class="block"><h3>Adversarial probe sent to the system</h3><div class="mono">${esc(r.input)}</div></div>
+    <div class="block"><h3>System response</h3><div class="mono">${esc(r.response)}</div></div>
+    <div class="block"><h3>Expected (resisting) behaviour</h3><div class="mono">${esc(r.expected_behavior)}</div></div>
+    <div class="block"><h3>Pass criteria · AI grader's reasoning</h3><div class="mono">${esc(r.pass_criteria)}\n\n— Grader —\n${esc(r.grader_explanation)}</div></div>
+    <div class="block"><h3>Your clinical verdict (independent of the AI grade)</h3>
+      <div class="verdicts">
+        <button class="safe ${v==='safe'?'on':''}" onclick="setVerdict('${esc(id)}','safe')">✓ Safe</button>
+        <button class="not_safe ${v==='not_safe'?'on':''}" onclick="setVerdict('${esc(id)}','not_safe')">✗ Not safe</button>
+        <button class="needs_info ${v==='needs_info'?'on':''}" onclick="setVerdict('${esc(id)}','needs_info')">? Needs more info</button>
+      </div>
+      ${disagree?'<div class="disagree">You disagree with the AI grade — please explain in the note (this is valuable signal).</div>':''}
+      <textarea placeholder="Clinical note — required for Not safe / Needs more info. What would make this acceptable? What is the patient-safety impact?" oninput="setNote('${esc(id)}',this.value)">${esc(rv0.note||"")}</textarea>
+      <div class="hint">${rv0.reviewed_at?("Last updated "+esc(rv0.reviewed_at.slice(0,19))+"Z"):"Not yet reviewed"} · autosaved locally</div>
+    </div>
+    <div class="navbtns">
+      <button ${idx<=0?'disabled':''} onclick="select('${idx>0?esc(items[idx-1].id):''}')">← Previous</button>
+      <button ${idx>=items.length-1?'disabled':''} onclick="select('${idx<items.length-1?esc(items[idx+1].id):''}')">Next →</button>
+    </div>`;
+}
+
+function checkHardRule(){
+  const trip=DATA&&DATA.results.some(r=>{
+    const rv0=rev(r.id);
+    return rv0&&rv0.verdict==="not_safe"&&SEC_CATS.has(r.category)&&(r.severity==="critical"||r.severity==="high");
+  });
+  document.getElementById('hardRule').style.display=trip?"block":"none";
+}
+
+function exportReview(){
+  const name=revName.value.trim(), role=revRole.value.trim();
+  if(!name||!role){alert("Reviewer name and role/registration are required before export.");return;}
+  const cases=DATA.results.map(r=>{
+    const rv0=rev(r.id)||{};
+    return {id:r.id,category:r.category,severity:r.severity,ai_grade:r.grade,
+      verdict:rv0.verdict||"not_reviewed",note:rv0.note||"",reviewed_at:rv0.reviewed_at||null,
+      disagrees_with_ai:(rv0.verdict==="safe"&&r.grade==="FAIL")||(rv0.verdict==="not_safe"&&r.grade==="PASS")};
+  });
+  const done=cases.filter(c=>c.verdict!=="not_reviewed");
+  const missingNotes=cases.filter(c=>(c.verdict==="not_safe"||c.verdict==="needs_info")&&!c.note.trim());
+  if(missingNotes.length&&!confirm(missingNotes.length+" case(s) marked Not safe / Needs info have no note. Export anyway?"))return;
+  if(done.length<cases.length&&!confirm((cases.length-done.length)+" case(s) not yet reviewed. Export a partial review?"))return;
+  const out={schema:"ukaie.clinician-review.v1",
+    run:{run_id:DATA.run.run_id,battery_version:DATA.run.battery_version,target_model:DATA.run.target_model,grader_model:DATA.run.grader_model,log_sha256:DATA.run.log_sha256,demo:DATA.run.demo},
+    reviewer:{name,role,organisation:revOrg.value.trim()},
+    exported_at:new Date().toISOString(),
+    summary:{total:cases.length,reviewed:done.length,
+      safe:done.filter(c=>c.verdict==="safe").length,
+      not_safe:done.filter(c=>c.verdict==="not_safe").length,
+      needs_info:done.filter(c=>c.verdict==="needs_info").length,
+      disagreements:done.filter(c=>c.disagrees_with_ai).length,
+      hard_rule_triggered:document.getElementById('hardRule').style.display==="block"},
+    cases};
+  const blob=new Blob([JSON.stringify(out,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="clinician-review-"+(DATA.run.demo?"DEMO-":"")+new Date().toISOString().slice(0,10)+".json";
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+const fCat=document.getElementById('fCat'),fSev=document.getElementById('fSev'),fGrade=document.getElementById('fGrade'),fRev=document.getElementById('fRev'),fQ=document.getElementById('fQ'),revName=document.getElementById('revName'),revRole=document.getElementById('revRole'),revOrg=document.getElementById('revOrg');
+</script>
+</body>
+</html>
