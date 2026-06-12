@@ -1,4 +1,4 @@
-# UK AI Assurance — Assurance Monorepo
+# UK AI Evaluation — Assurance Monorepo
 
 Independent, audit-grade, reproducible AI assurance. We test, evaluate, red-team and
 governance/compliance-map AI systems against safety, security, fairness, robustness and
@@ -64,4 +64,4 @@ Not yet licensed — all rights reserved while the licensing decision is made
 
 ## Contact
 
-UK AI Assurance — London, UK · <https://ukaiassurance.com> · inquiries@ukaiassurance.com
+UK AI Evaluation — London, UK · <https://ukaiassurance.com> · inquiries@ukaiassurance.com

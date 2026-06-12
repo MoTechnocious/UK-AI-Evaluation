@@ -1,7 +1,7 @@
 [project]
 name = "uk-ai-assurance"
 version = "0.0.1"
-description = "UK AI Assurance — evaluation, red-team and assurance tooling (Inspect-based)"
+description = "UK AI Evaluation — evaluation, red-team and assurance tooling (Inspect-based)"
 requires-python = ">=3.11"
 dependencies = [
     # Spine of the eval product (UK AISI). Exact pin lives in the lockfile —

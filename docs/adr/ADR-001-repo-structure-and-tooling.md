@@ -6,7 +6,7 @@ accepted (2026-06-10)
 
 ## Context
 
-UK AI Assurance is pre-seed, two core engineers (Mohamed, MZ), near-zero budget. The
+UK AI Evaluation is pre-seed, two core engineers (Mohamed, MZ), near-zero budget. The
 product is independent, audit-grade, **reproducible** assurance for high-stakes AI —
 health/clinical-diagnostics first. Engineering choices must minimise maintenance burden,
 maximise auditability, and align with the tooling regulators and frontier-lab safety
@@ -14,7 +14,7 @@ teams already trust.
 
 ## Decision
 
-- **Single GitHub monorepo** (`MoTechnocious/UK-AI-Assurance`) with top-level
+- **Single GitHub monorepo** (`MoTechnocious/UK-AI-Evaluation`) with top-level
   `/evals`, `/redteam`, `/reports`, `/infra`, `/docs`.
 - **Evaluation harness: Inspect (UK AISI).** Every evaluation is an Inspect
   task/solver/scorer unless an ADR documents why not. The `.eval` log is the artefact

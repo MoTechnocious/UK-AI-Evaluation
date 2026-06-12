@@ -41,5 +41,5 @@ State plainly. An unstated limitation is an overclaim.
 Run configs, dataset provenance, full logs index.
 
 ---
-*UK AI Assurance is an independent assessor. This report does not constitute
+*UK AI Evaluation is an independent assessor. This report does not constitute
 certification, regulatory approval, or endorsement by any regulator or body.*
